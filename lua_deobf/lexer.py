@@ -3,7 +3,7 @@
 Supported extras on top of stock Lua 5.4:
   * backtick hash strings:   `prop_bench_01a`
   * compound assignment:     a += 1, s ..= "x", n //= 2, ...
-  * safe navigation:         a?.b
+  * safe navigation:         a?.b   a?[k]   a?:method()
   * C-style comments are NOT supported (they are not valid CfxLua either).
 
 Comments are not emitted as tokens; they are attached to the token that
@@ -19,7 +19,7 @@ repeat return then true until while
 
 # Longest operators first so the scanner is greedy.
 OPERATORS = sorted("""
-... ..= .. == ~= <= >= << >> // :: += -= *= /= %= ^= |= &= <<= >>= //= ?.
+... ..= .. == ~= <= >= << >> // :: += -= *= /= %= ^= |= &= <<= >>= //= ?. ?[ ?:
 + - * / % ^ # & ~ | < > = ( ) { } [ ] ; : , .
 """.split(), key=len, reverse=True)
 

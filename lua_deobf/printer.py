@@ -166,13 +166,16 @@ class Printer:
             key = string_key(e.key)
             if key is not None:
                 return obj + ("." if e.style == "dot" else "?.") + key
+        if e.style in ("safe", "safebracket"):
+            return "%s?[%s]" % (obj, self.expr(e.key, level))
         return "%s[%s]" % (obj, self.expr(e.key, level))
 
     def expr_Call(self, e, level):
         return "%s(%s)" % (self.expr(e.func, level), self.exprlist(e.args, level))
 
     def expr_MethodCall(self, e, level):
-        return "%s:%s(%s)" % (self.expr(e.obj, level), e.method, self.exprlist(e.args, level))
+        return "%s%s%s(%s)" % (self.expr(e.obj, level), "?:" if e.safe else ":", e.method,
+                               self.exprlist(e.args, level))
 
     def expr_Function(self, e, level):
         return "function" + self.funcbody(e, level)

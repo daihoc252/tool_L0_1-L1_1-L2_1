@@ -357,16 +357,17 @@ class Parser:
                 key = N.Const("string", '"%s"' % key_tok.value, pos=key_tok.index, line=key_tok.line)
                 expr = N.Index(expr, key, "dot" if tok.value == "." else "safe",
                                pos=expr.pos, line=expr.line)
-            elif tok.is_op("["):
+            elif tok.is_op("[") or tok.is_op("?["):
                 self.advance()
                 key = self.parse_expr()
                 self.expect_op("]")
-                expr = N.Index(expr, key, "bracket", pos=expr.pos, line=expr.line)
-            elif tok.is_op(":"):
+                expr = N.Index(expr, key, "bracket" if tok.value == "[" else "safebracket",
+                               pos=expr.pos, line=expr.line)
+            elif tok.is_op(":") or tok.is_op("?:"):
                 self.advance()
                 method = self.expect_name().value
                 args = self.parse_args()
-                expr = N.MethodCall(expr, method, args, pos=expr.pos, line=expr.line)
+                expr = N.MethodCall(expr, method, args, tok.value == "?:", pos=expr.pos, line=expr.line)
             elif tok.is_op("(") or tok.is_op("{") or tok.kind == "string":
                 args = self.parse_args()
                 expr = N.Call(expr, args, pos=expr.pos, line=expr.line)

@@ -72,7 +72,8 @@ class Name(Expr):
 
 
 class Index(Expr):
-    """obj.key / obj[key] / obj?.key  (style: 'dot' | 'bracket' | 'safe')."""
+    """obj.key / obj[key] / obj?.key / obj?[key]
+    (style: 'dot' | 'bracket' | 'safe' | 'safebracket')."""
     _fields = ("obj", "key", "style")
 
 
@@ -81,7 +82,8 @@ class Call(Expr):
 
 
 class MethodCall(Expr):
-    _fields = ("obj", "method", "args")
+    """obj:method(args), or obj?:method(args) when ``safe`` is true."""
+    _fields = ("obj", "method", "args", "safe")
 
 
 class Function(Expr):

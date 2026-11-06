@@ -57,6 +57,14 @@ do return end
         result = verify(self.SOURCE, to_source(parse(self.SOURCE)), use_lua=False)
         self.assertTrue(result.ok, result.problems)
 
+    def test_safe_navigation(self):
+        source = "local a = t?[k]?.x\nlocal b = o?:m(1)\nprint(a, b, t?['y'])\n"
+        out = to_source(parse(source))
+        self.assertIn("t?[k]?.x", out)
+        self.assertIn("o?:m(1)", out)
+        self.assertIn("t?['y']", out)
+        self.assertTrue(verify(source, out, use_lua=False).ok)
+
     def test_comments_are_kept(self):
         out = to_source(parse("-- hello\nlocal x = 1 -- trailing\nprint(x)\n"))
         self.assertIn("-- hello", out)

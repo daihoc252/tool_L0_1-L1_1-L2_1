@@ -128,7 +128,7 @@ class Canonical:
         elif isinstance(e, N.Const):
             self.tokens.append(("CONST", e.kind, e.raw))
         elif isinstance(e, N.Index):
-            self.tokens.append(("INDEX", e.style == "safe"))
+            self.tokens.append(("INDEX", e.style in ("safe", "safebracket")))
             self.expr(e.obj)
             self.expr(e.key)
         elif isinstance(e, N.Call):
@@ -137,7 +137,7 @@ class Canonical:
             for arg in e.args:
                 self.expr(arg)
         elif isinstance(e, N.MethodCall):
-            self.tokens.append(("METHOD", e.method, len(e.args)))
+            self.tokens.append(("METHOD", e.method, len(e.args), bool(e.safe)))
             self.expr(e.obj)
             for arg in e.args:
                 self.expr(arg)
