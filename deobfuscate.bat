@@ -47,12 +47,11 @@ rem ---- Mot file .lua --------------------------------------------------------
 for %%F in ("%SRC%") do set "OUT=%%~dpnF_deobf.lua"
 echo.
 echo   Dang xu ly file: %SRC%
-%PY% -m lua_deobf "%SRC%" -o "%OUT%" --report
+%PY% -m lua_deobf "%SRC%" -o "%OUT%"
 set "RC=%ERRORLEVEL%"
 echo.
 if not "%RC%"=="0" goto failed
 echo   XONG! Ket qua: %OUT%
-echo   Bao cao   : %OUT:~0,-4%.report.md
 explorer /select,"%OUT%"
 goto end
 
@@ -63,12 +62,11 @@ echo.
 echo   Dang xu ly thu muc: %SRC%
 echo   Ket qua se luu vao: %OUT%
 echo.
-%PY% -m lua_deobf "%SRC%" -o "%OUT%" --report
+%PY% -m lua_deobf "%SRC%" -o "%OUT%"
 set "RC=%ERRORLEVEL%"
 echo.
 if not "%RC%"=="0" goto failed
 echo   XONG! Tat ca file da duoc luu trong: %OUT%
-echo   (moi file .lua co them file .report.md giai thich)
 explorer "%OUT%"
 goto end
 

@@ -19,8 +19,9 @@ No dependencies; Python 3.8+. Install `lupa` (optional) to also compile the outp
    * **drag** a folder or a `.lua` file onto `deobfuscate.bat`, or
    * double-click it, then choose **1** to pick a folder in a dialog, or **2** to paste a folder/file path.
 3. Results:
-   * folder `C:\res\shop` → `C:\res\shop_deobf\` (same subfolders, every `.lua` processed, plus a `.report.md` per file)
-   * file `client.lua` → `client_deobf.lua` + `client_deobf.report.md` next to it
+   * folder `C:\res\shop` → `C:\res\shop_deobf\` (same subfolders, every `.lua` processed)
+   * file `client.lua` → `client_deobf.lua` next to it
+   * no report files are written; for one, run the command line with `--report`
 
    Explorer opens on the result automatically.
 
