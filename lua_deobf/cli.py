@@ -8,6 +8,7 @@
 
 import argparse
 import os
+import shutil
 import sys
 
 from . import DEFAULT_PATTERN, LuaSyntaxError, __version__, deobfuscate
@@ -38,6 +39,10 @@ def build_parser():
     p.add_argument("--indent", type=int, default=4, help="spaces per indent level (default 4)")
     p.add_argument("--tabs", action="store_true", help="indent with tabs")
     p.add_argument("--no-verify", action="store_true", help="skip the equivalence check")
+    p.add_argument("--lua-only", action="store_true",
+                   help="for folders: only write .lua files (by default every other file - "
+                        "html/js/css, images, json, sql... - is copied unchanged so the "
+                        "output folder is a complete resource)")
     p.add_argument("-q", "--quiet", action="store_true", help="no progress/summary on stderr")
     p.add_argument("--version", action="version", version="%(prog)s " + __version__)
     return p
@@ -54,6 +59,34 @@ def collect(inputs):
                         yield path, os.path.relpath(path, item)
         else:
             yield item, os.path.basename(item)
+
+
+def copy_other_files(inputs, output):
+    """Copy every non-.lua file (and empty folder) of the input folders to
+    ``output`` unchanged, so the result is a complete, runnable resource."""
+    out_abs = os.path.abspath(output)
+    copied = 0
+    for item in inputs:
+        if not os.path.isdir(item):
+            continue
+        for root, dirs, files in os.walk(item):
+            # never descend into the output folder itself
+            dirs[:] = [d for d in dirs if os.path.abspath(os.path.join(root, d)) != out_abs]
+            rel_root = os.path.relpath(root, item)
+            os.makedirs(os.path.join(output, rel_root), exist_ok=True)
+            for name in files:
+                if name.endswith(".lua"):
+                    continue
+                shutil.copy2(os.path.join(root, name), os.path.join(output, rel_root, name))
+                copied += 1
+    return copied
+
+
+def copy_original(path, rel, output):
+    """A .lua file that could not be processed is copied unchanged."""
+    target = os.path.join(output, rel)
+    os.makedirs(os.path.dirname(target) or ".", exist_ok=True)
+    shutil.copy2(path, target)
 
 
 def read_source(path):
@@ -89,6 +122,12 @@ def main(argv=None):
         return 2
     indent = "\t" if args.tabs else " " * args.indent
     failures = []      # (path, short reason)
+    keep_all = many and args.output and not args.lua_only and not args.markdown
+    if keep_all:
+        copied = copy_other_files(args.inputs, args.output)
+        if not args.quiet and copied:
+            print("copied %d other file(s) (html, js, images, json...) unchanged -> %s"
+                  % (copied, args.output), file=sys.stderr)
     for path, rel in files:
         try:
             source = read_source(path)
@@ -98,11 +137,17 @@ def main(argv=None):
         except LuaSyntaxError as exc:
             print("%s: syntax error: %s" % (path, exc), file=sys.stderr)
             failures.append((path, "syntax error: %s" % exc))
+            if keep_all:
+                copy_original(path, rel, args.output)
+                failures[-1] = (path, failures[-1][1] + " (original copied unchanged)")
             continue
         except Exception as exc:     # keep going with the other files
             print("%s: INTERNAL ERROR (%s: %s) - file skipped, please report it"
                   % (path, type(exc).__name__, exc), file=sys.stderr)
             failures.append((path, "internal error: %s: %s" % (type(exc).__name__, exc)))
+            if keep_all:
+                copy_original(path, rel, args.output)
+                failures[-1] = (path, failures[-1][1] + " (original copied unchanged)")
             continue
         report = result.report(os.path.basename(path))
         text = report if args.markdown else result.code

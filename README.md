@@ -19,7 +19,7 @@ No dependencies; Python 3.8+. Install `lupa` (optional) to also compile the outp
    * **drag** a folder or a `.lua` file onto `deobfuscate.bat`, or
    * double-click it, then choose **1** to pick a folder in a dialog, or **2** to paste a folder/file path.
 3. Results:
-   * folder `C:\res\shop` → `C:\res\shop_deobf\` (same subfolders, every `.lua` processed)
+   * folder `C:\res\shop` → `C:\res\shop_deobf\` (same subfolders, every `.lua` processed; all other files - `!SETUP`, html/js/css, images, json, sql... - are copied unchanged so the folder is a complete resource; use `--lua-only` on the command line to skip them)
    * file `client.lua` → `client_deobf.lua` next to it
    * no report files are written; for one, run the command line with `--report`
 
